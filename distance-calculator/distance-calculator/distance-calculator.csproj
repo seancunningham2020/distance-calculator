@@ -50,12 +50,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GeoResults.cs" />
-    <Compile Include="GetApiKey.cs" />
-    <Compile Include="GoogleMaps.cs" />
-    <Compile Include="LocationDetails.cs" />
+    <Compile Include="Models\GeoResults.cs" />
+    <Compile Include="Models\ResultContainer.cs" />
+    <Compile Include="Services\GetApiKey.cs" />
+    <Compile Include="Services\GoogleMaps.cs" />
+    <Compile Include="Models\LocationDetails.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\LocationSearch.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

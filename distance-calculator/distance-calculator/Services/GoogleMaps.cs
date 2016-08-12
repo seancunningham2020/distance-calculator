@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using distance_calculator.Models;
 
 namespace distance_calculator
 {
@@ -36,7 +37,7 @@ namespace distance_calculator
             googleMapsBaseUrl = url;
         }
 
-        public async Task<LocationDetails> GetGeoCoordinates(string addr)
+        public async Task<ResultContainer<LocationDetails>> GetGeoCoordinates(string addr)
         {
             var searchResult = new LocationDetails();
 
@@ -51,24 +52,39 @@ namespace distance_calculator
                 HttpResponseMessage response = await client.GetAsync(queryString);
                 if (!response.IsSuccessStatusCode)
                 {
-                    // TODO:: Return error
+                    return new ResultContainer<LocationDetails>
+                           {
+                               Status = false,
+                               Result = null,
+                               Message = $"ERROR {response.StatusCode}:: Cannot read from Google Maps API"
+                           };
                 }
+
                 if (response.IsSuccessStatusCode)
                 {
                     var data = await response.Content.ReadAsAsync<GeoResults>();
 
                     if (data.status != "OK")
                     {
-                        // TODO: Return error
+                        return new ResultContainer<LocationDetails>
+                               {
+                                   Status = true,
+                                   Message = "No results found",
+                                   Result = null
+                               };
                     }
 
                     searchResult.Latitude = data.results[0].geometry.location.lat;
                     searchResult.Longitude = data.results[0].geometry.location.lng;
-                    searchResult.Address = data.results[0].formatted_address.ToString();
+                    searchResult.Address = data.results[0].formatted_address;
                 }
             }
 
-            return searchResult;
+            return new ResultContainer<LocationDetails>
+                   {
+                       Status = true,
+                       Result = searchResult
+                   };
         }
     }
 }
