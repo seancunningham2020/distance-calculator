@@ -5,9 +5,15 @@ namespace distance_calculator.Services
 {
     public class LocationSearch
     {
+        private GoogleMaps _googleMaps;
+
+        public LocationSearch()
+        {
+            _googleMaps = new GoogleMaps();
+        }
+
         public ResultContainer<LocationDetails> SearchLocation()
         {
-            var googleMaps = new GoogleMaps();
             var accept = "N";
             var searchResult = new LocationDetails();
 
@@ -22,7 +28,7 @@ namespace distance_calculator.Services
                     continue;
                 }
 
-                var result = googleMaps.GetGeoCoordinates(searchTerm).Result;
+                var result = _googleMaps.GetGeoCoordinates(searchTerm).Result;
 
                 if (result.Message == "ZERO_RESULTS")
                 {
@@ -38,7 +44,7 @@ namespace distance_calculator.Services
                 searchResult = result.Result;
 
                 var outputService = new OutputService();
-                outputService.DisplayLocation(searchResult);
+                outputService.DisplayLocation("Search Results:", searchResult);
 
                 Console.Write("Accept this result? (Y/N) ");
                 accept = Console.ReadLine();
@@ -53,17 +59,12 @@ namespace distance_calculator.Services
 
         public ResultContainer<LocationDetails> FindLocationFromGeoCoordinates(double latitude, double longitude)
         {
-            var googleMaps = new GoogleMaps();
-
-            return googleMaps.FindGeoCoordinatesLocation(latitude, longitude).Result;
+            return _googleMaps.FindGeoCoordinatesLocation(latitude, longitude).Result;
         }
 
         public ResultContainer<LocationDetails> FindPointsOfInterest(double latitude, double longitude)
         {
-            var googleMaps = new GoogleMaps();
-
-            return googleMaps.FindPointsOfInterest(latitude, longitude, 10).Result;
+            return _googleMaps.FindPointsOfInterest(latitude, longitude, 5).Result;
         }
-
     }
 }

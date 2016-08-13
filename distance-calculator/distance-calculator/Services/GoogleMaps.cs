@@ -125,6 +125,8 @@ namespace distance_calculator
                     }
 
                     searchResult.Address = data.results[0].formatted_address;
+                    searchResult.Latitude = data.results[0].geometry.location.lat;
+                    searchResult.Longitude = data.results[0].geometry.location.lng;
                 }
             }
 
@@ -137,9 +139,13 @@ namespace distance_calculator
 
         public async Task<ResultContainer<LocationDetails>> FindPointsOfInterest(double latitude, double longitude, int radius)
         {
-            var queryString = string.Format("?location={0},{1}&key={2}", Uri.EscapeUriString(latitude.ToString()), Uri.EscapeUriString(longitude.ToString()), this.API_KEY);
+            var queryString = string.Format("?location={0},{1}&radius{2}&key={3}&&rankby=distance&type=point_of_interest", 
+                Uri.EscapeUriString(latitude.ToString()), 
+                Uri.EscapeUriString(longitude.ToString()), 
+                Uri.EscapeUriString(radius.ToString()),
+                this.API_KEY);
 
-            var searchResult = new LocationDetails();
+            var nearestPOI = new LocationDetails();
 
             using (var client = new HttpClient())
             {
@@ -168,18 +174,21 @@ namespace distance_calculator
                         {
                             Status = false,
                             Message = data.status,
-                            Result = null
                         };
                     }
 
-                    //searchResult.Address = data.results[0].formatted_address;
+                    nearestPOI.Name = data.results[0].name;
+                    nearestPOI.Address = data.results[0].vicinity;
+                    nearestPOI.Latitude = data.results[0].geometry.location.lat;
+                    nearestPOI.Longitude = data.results[0].geometry.location.lng;
+                    nearestPOI.LocationType = string.Join(",", data.results[0].types);
                 }
             }
 
             return new ResultContainer<LocationDetails>
             {
                 Status = true,
-                Result = null //searchResult
+                Result = nearestPOI
             };
         }
     }
