@@ -50,7 +50,7 @@ namespace distance_calculator.Services
             };
         }
 
-        private void DisplayResults(LocationDetails location)
+        public void DisplayResults(LocationDetails location)
         {
             Console.WriteLine();
             Console.WriteLine($"Address: {location.Address}");

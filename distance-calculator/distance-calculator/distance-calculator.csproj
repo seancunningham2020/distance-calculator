@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Models\GeoResults.cs" />
     <Compile Include="Models\ResultContainer.cs" />
+    <Compile Include="Services\GeoCalculations.cs" />
     <Compile Include="Services\GetApiKey.cs" />
     <Compile Include="Services\GoogleMaps.cs" />
     <Compile Include="Models\LocationDetails.cs" />

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Configuration;
-using System.Device.Location;
 using distance_calculator.Services;
 
 namespace distance_calculator
@@ -25,35 +24,50 @@ namespace distance_calculator
 
             // Start Location
             Console.WriteLine("Start Location");
-            var searchResult1 = locationSearch.SearchLocation(apiKeyResult.Result, googleMapsBaseUrl);
-            if (!searchResult1.Status)
+            var startSearchResult = locationSearch.SearchLocation(apiKeyResult.Result, googleMapsBaseUrl);
+            if (!startSearchResult.Status)
             {
-                ExitWithError(searchResult1.Message);
+                ExitWithError(startSearchResult.Message);
             }
 
-            var startLocation = searchResult1.Result;
+            var startLocation = startSearchResult.Result;
 
-            // Second Location
-            Console.WriteLine(Environment.NewLine + Environment.NewLine + "Second Location");
-            var searchResult2 = locationSearch.SearchLocation(apiKeyResult.Result, googleMapsBaseUrl);
-            if (!searchResult2.Status)
+            // End Location
+            Console.WriteLine(Environment.NewLine + Environment.NewLine + "End Location");
+            var endSearchResult = locationSearch.SearchLocation(apiKeyResult.Result, googleMapsBaseUrl);
+            if (!endSearchResult.Status)
             {
-                ExitWithError(searchResult2.Message);
+                ExitWithError(endSearchResult.Message);
             }
 
-            var endLocation = searchResult2.Result;
+            var endLocation = endSearchResult.Result;
 
             // Calculation
-            var startCoord = new GeoCoordinate(startLocation.Latitude, startLocation.Longitude);
-            var endCoord = new GeoCoordinate(endLocation.Latitude, endLocation.Longitude);
+            var geoCalculations = new GeoCalculations();
 
-            var distanceInMetres = startCoord.GetDistanceTo(endCoord);
+            var startCoord = geoCalculations.FindCoordinates(startLocation.Latitude, startLocation.Longitude);
+            var endCoord = geoCalculations.FindCoordinates(endLocation.Latitude, endLocation.Longitude);
+
+            var distanceInMetres = geoCalculations.CalculateDistanceInMetres(startCoord, endCoord);
+
+            
+            OutputResults(startLocation, endLocation, distanceInMetres);
+            
+            Console.WriteLine(Environment.NewLine + "Press any key to exit...");
+            Console.ReadKey();
+        }
+
+        static void OutputResults(LocationDetails startLocation, LocationDetails endLocation, double distanceInMetres)
+        {
+            Console.Clear();
+
+            var locationSearch = new LocationSearch();
+
+            locationSearch.DisplayResults(startLocation);
+            locationSearch.DisplayResults(endLocation);
 
             Console.WriteLine();
-            Console.WriteLine($"Distance: {distanceInMetres/1000:0.00} km");
-
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
+            Console.WriteLine($"Distance: {distanceInMetres / 1000:0.00} km");
         }
 
         static void ExitWithError(string errorMessage)
