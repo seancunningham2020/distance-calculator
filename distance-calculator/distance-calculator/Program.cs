@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using distance_calculator.Services;
 
 namespace distance_calculator
@@ -8,23 +7,11 @@ namespace distance_calculator
     {
         static void Main(string[] args)
         {
-            // Configuration
-            var apiKeyFile = ConfigurationManager.AppSettings["googleMapsApiKeyFile"];
-            var getApiKey = new GetApiKey();
-            var apiKeyResult = getApiKey.GetKeyFromFile(apiKeyFile);
-
-            if (!apiKeyResult.Status)
-            {
-                ExitWithError(apiKeyResult.Message);
-            }
-
-            var googleMapsBaseUrl = ConfigurationManager.AppSettings["googleMapsBaseUrl"];
-
             var locationSearch = new LocationSearch();
 
             // Start Location
             Console.WriteLine("Start Location");
-            var startSearchResult = locationSearch.SearchLocation(apiKeyResult.Result, googleMapsBaseUrl);
+            var startSearchResult = locationSearch.SearchLocation();
             if (!startSearchResult.Status)
             {
                 ExitWithError(startSearchResult.Message);
@@ -34,7 +21,7 @@ namespace distance_calculator
 
             // End Location
             Console.WriteLine(Environment.NewLine + Environment.NewLine + "End Location");
-            var endSearchResult = locationSearch.SearchLocation(apiKeyResult.Result, googleMapsBaseUrl);
+            var endSearchResult = locationSearch.SearchLocation();
             if (!endSearchResult.Status)
             {
                 ExitWithError(endSearchResult.Message);
@@ -52,7 +39,19 @@ namespace distance_calculator
 
             
             OutputResults(startLocation, endLocation, distanceInMetres);
-            
+
+
+            // Midpoint
+            var midPoint = geoCalculations.MidPoint(startCoord, endCoord);
+            var midPointLocation = locationSearch.FindLocationFromGeoCoordinates(midPoint.Latitude, midPoint.Longitude);
+
+            var outputService = new OutputService();
+            outputService.DisplayLocation(midPointLocation.Result);
+
+
+            // Points of interest
+            var poi = locationSearch.FindPointsOfInterest(midPoint.Latitude, midPoint.Longitude);
+
             Console.WriteLine(Environment.NewLine + "Press any key to exit...");
             Console.ReadKey();
         }
@@ -61,10 +60,10 @@ namespace distance_calculator
         {
             Console.Clear();
 
-            var locationSearch = new LocationSearch();
+            var outputService = new OutputService();
 
-            locationSearch.DisplayResults(startLocation);
-            locationSearch.DisplayResults(endLocation);
+            outputService.DisplayLocation(startLocation);
+            outputService.DisplayLocation(endLocation);
 
             Console.WriteLine();
             Console.WriteLine($"Distance: {distanceInMetres / 1000:0.00} km");

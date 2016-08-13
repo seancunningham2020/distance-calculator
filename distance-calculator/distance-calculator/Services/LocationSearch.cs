@@ -5,9 +5,9 @@ namespace distance_calculator.Services
 {
     public class LocationSearch
     {
-        public ResultContainer<LocationDetails> SearchLocation(string apiKey, string googleMapsBaseUrl)
+        public ResultContainer<LocationDetails> SearchLocation()
         {
-            var googleMaps = new GoogleMaps(apiKey, googleMapsBaseUrl);
+            var googleMaps = new GoogleMaps();
             var accept = "N";
             var searchResult = new LocationDetails();
 
@@ -37,7 +37,8 @@ namespace distance_calculator.Services
                 
                 searchResult = result.Result;
 
-                DisplayResults(searchResult);
+                var outputService = new OutputService();
+                outputService.DisplayLocation(searchResult);
 
                 Console.Write("Accept this result? (Y/N) ");
                 accept = Console.ReadLine();
@@ -50,13 +51,19 @@ namespace distance_calculator.Services
             };
         }
 
-        public void DisplayResults(LocationDetails location)
+        public ResultContainer<LocationDetails> FindLocationFromGeoCoordinates(double latitude, double longitude)
         {
-            Console.WriteLine();
-            Console.WriteLine($"Address: {location.Address}");
-            Console.WriteLine($"Lat: {location.Latitude}");
-            Console.WriteLine($"Long: {location.Longitude}");
-            Console.WriteLine();
+            var googleMaps = new GoogleMaps();
+
+            return googleMaps.FindGeoCoordinatesLocation(latitude, longitude).Result;
         }
+
+        public ResultContainer<LocationDetails> FindPointsOfInterest(double latitude, double longitude)
+        {
+            var googleMaps = new GoogleMaps();
+
+            return googleMaps.FindPointsOfInterest(latitude, longitude, 10).Result;
+        }
+
     }
 }
