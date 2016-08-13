@@ -68,8 +68,8 @@ namespace distance_calculator
                     {
                         return new ResultContainer<LocationDetails>
                                {
-                                   Status = true,
-                                   Message = "No results found",
+                                   Status = false,
+                                   Message = data.status,
                                    Result = null
                                };
                     }

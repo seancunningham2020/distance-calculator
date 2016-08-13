@@ -16,23 +16,31 @@ namespace distance_calculator.Services
                 Console.Write(Environment.NewLine + "Enter Location: ");
                 var searchTerm = Console.ReadLine();
 
+                if (searchTerm == string.Empty)
+                {
+                    Console.WriteLine("Please enter a location for which to search.");
+                    continue;
+                }
+
                 var result = googleMaps.GetGeoCoordinates(searchTerm).Result;
+
+                if (result.Message == "ZERO_RESULTS")
+                {
+                    Console.WriteLine("No matches were found for your search term. Please try again.");
+                    continue;
+                }
 
                 if (!result.Status)
                 {
-                    // TODO Handle zero found
+                    return result;
                 }
-
+                
                 searchResult = result.Result;
 
-                Console.WriteLine();
-                Console.WriteLine($"Address: {searchResult.Address}");
-                Console.WriteLine($"Lat: {searchResult.Latitude}");
-                Console.WriteLine($"Long: {searchResult.Longitude}");
-                Console.WriteLine();
+                DisplayResults(searchResult);
 
                 Console.Write("Accept this result? (Y/N) ");
-                accept = Console.ReadKey().KeyChar.ToString();
+                accept = Console.ReadLine();
             }
 
             return new ResultContainer<LocationDetails>
@@ -40,6 +48,15 @@ namespace distance_calculator.Services
                        Status = true,
                        Result = searchResult
             };
+        }
+
+        private void DisplayResults(LocationDetails location)
+        {
+            Console.WriteLine();
+            Console.WriteLine($"Address: {location.Address}");
+            Console.WriteLine($"Lat: {location.Latitude}");
+            Console.WriteLine($"Long: {location.Longitude}");
+            Console.WriteLine();
         }
     }
 }
