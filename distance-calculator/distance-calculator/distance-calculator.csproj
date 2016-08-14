@@ -53,14 +53,14 @@
     <Compile Include="Models\GeoResults.cs" />
     <Compile Include="Models\PoiResults.cs" />
     <Compile Include="Models\ResultContainer.cs" />
-    <Compile Include="Services\GeoCalculations.cs" />
-    <Compile Include="Services\GetApiKey.cs" />
+    <Compile Include="BusinessLogic\GeoCalculations.cs" />
+    <Compile Include="Helpers\GetApiKey.cs" />
     <Compile Include="Services\GoogleMaps.cs" />
     <Compile Include="Models\LocationDetails.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\LocationSearch.cs" />
-    <Compile Include="Services\OutputService.cs" />
+    <Compile Include="BusinessLogic\LocationSearch.cs" />
+    <Compile Include="Helpers\OutputHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

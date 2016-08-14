@@ -1,7 +1,8 @@
 ﻿using System;
 using distance_calculator.Models;
+using distance_calculator.Helpers;
 
-namespace distance_calculator.Services
+namespace distance_calculator.BusinessLogic
 {
     public class LocationSearch
     {
@@ -43,8 +44,8 @@ namespace distance_calculator.Services
                 
                 searchResult = result.Result;
 
-                var outputService = new OutputService();
-                outputService.DisplayLocation("Search Results:", searchResult);
+                var outputHelper = new OutputHelper();
+                outputHelper.DisplayLocation("Search Results:", searchResult);
 
                 Console.Write("Accept this result? (Y/N) ");
                 accept = Console.ReadLine();

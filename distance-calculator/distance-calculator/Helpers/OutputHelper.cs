@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace distance_calculator.Services
+namespace distance_calculator.Helpers
 {
-    public class OutputService
+    public class OutputHelper
     {
         public void ClearScreen()
         {

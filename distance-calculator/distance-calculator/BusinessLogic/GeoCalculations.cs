@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Device.Location;
 
-namespace distance_calculator.Services
+namespace distance_calculator.BusinessLogic
 {
     public class GeoCalculations
     {

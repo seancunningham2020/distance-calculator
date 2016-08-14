@@ -1,5 +1,6 @@
 ﻿using System;
-using distance_calculator.Services;
+using distance_calculator.BusinessLogic;
+using distance_calculator.Helpers;
 
 namespace distance_calculator
 {
@@ -8,14 +9,14 @@ namespace distance_calculator
         static void Main(string[] args)
         {
             var locationSearch = new LocationSearch();
-            var outputService = new OutputService();
+            var outputHelper = new OutputHelper();
 
             // Start Location
             Console.WriteLine("Start Location");
             var startSearchResult = locationSearch.SearchLocation();
             if (!startSearchResult.Status)
             {
-                outputService.ExitWithError(startSearchResult.Message);
+                outputHelper.ExitWithError(startSearchResult.Message);
             }
 
             var startLocation = startSearchResult.Result;
@@ -25,7 +26,7 @@ namespace distance_calculator
             var endSearchResult = locationSearch.SearchLocation();
             if (!endSearchResult.Status)
             {
-                outputService.ExitWithError(endSearchResult.Message);
+                outputHelper.ExitWithError(endSearchResult.Message);
             }
 
             var endLocation = endSearchResult.Result;
@@ -39,27 +40,27 @@ namespace distance_calculator
             var distanceInMetres = geoCalculations.CalculateDistanceInMetres(startCoord, endCoord);
 
 
-            outputService.ClearScreen();
-            outputService.DisplayLocation("Start Location", startLocation);
-            outputService.DisplayLocation("End Location", endLocation);
-            outputService.DisplayDistance(distanceInMetres);
+            outputHelper.ClearScreen();
+            outputHelper.DisplayLocation("Start Location", startLocation);
+            outputHelper.DisplayLocation("End Location", endLocation);
+            outputHelper.DisplayDistance(distanceInMetres);
 
 
             // Midpoint
             var midPoint = geoCalculations.MidPoint(startCoord, endCoord);
             var midPointLocation = locationSearch.FindLocationFromGeoCoordinates(midPoint.Latitude, midPoint.Longitude);
 
-            outputService.DisplayLocation("Midpoint", midPointLocation.Result);
+            outputHelper.DisplayLocation("Midpoint", midPointLocation.Result);
 
 
             // Points of interest
             var poi = locationSearch.FindPointsOfInterest(midPoint.Latitude, midPoint.Longitude);
             if (!poi.Status)
             {
-                outputService.ExitWithError(poi.Message);
+                outputHelper.ExitWithError(poi.Message);
             }
 
-            outputService.DisplayPOI(poi.Result);
+            outputHelper.DisplayPOI(poi.Result);
 
             Console.WriteLine(Environment.NewLine + "Press any key to exit...");
             Console.ReadKey();

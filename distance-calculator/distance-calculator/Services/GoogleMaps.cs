@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using distance_calculator.Models;
-using distance_calculator.Services;
+using distance_calculator.Helpers;
 
 namespace distance_calculator
 {
@@ -22,8 +22,8 @@ namespace distance_calculator
 
             if (!apiKeyResult.Status)
             {
-                var outputService = new OutputService();
-                outputService.ExitWithError(apiKeyResult.Message);
+                var outputHelper = new OutputHelper();
+                outputHelper.ExitWithError(apiKeyResult.Message);
             }
 
             _apiKey = apiKeyResult.Result;

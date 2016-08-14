@@ -2,7 +2,7 @@
 using System.Text;
 using distance_calculator.Models;
 
-namespace distance_calculator
+namespace distance_calculator.Helpers
 {
     public class GetApiKey
     {
