@@ -28,7 +28,7 @@ namespace distance_calculator.Services
                     continue;
                 }
 
-                var result = _googleMaps.GetGeoCoordinates(searchTerm).Result;
+                var result = _googleMaps.GetLocationGeoCoordinates(searchTerm).Result;
 
                 if (result.Message == "ZERO_RESULTS")
                 {

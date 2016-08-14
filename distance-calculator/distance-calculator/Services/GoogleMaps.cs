@@ -4,14 +4,15 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using distance_calculator.Models;
+using distance_calculator.Services;
 
 namespace distance_calculator
 {
     class GoogleMaps
     {
-        private string API_KEY = string.Empty;
-        private string googleMapsBaseUrl = string.Empty;
-        private string googlePlacesBaseUrl = string.Empty;
+        private string _apiKey = string.Empty;
+        private string _googleMapsBaseUrl = string.Empty;
+        private string _googlePlacesBaseUrl = string.Empty;
 
         public GoogleMaps()
         {
@@ -21,120 +22,28 @@ namespace distance_calculator
 
             if (!apiKeyResult.Status)
             {
-                // TODO: Fix this
-                //ExitWithError(apiKeyResult.Message);
+                var outputService = new OutputService();
+                outputService.ExitWithError(apiKeyResult.Message);
             }
 
-            API_KEY = apiKeyResult.Result;
+            _apiKey = apiKeyResult.Result;
 
-            googleMapsBaseUrl = ConfigurationManager.AppSettings["googleMapsBaseUrl"];
-            googlePlacesBaseUrl = ConfigurationManager.AppSettings["googlePlacesBaseUrl"];
-        }
-
-        public GoogleMaps(string api_key, string googleMapsBaseUrl)
-        {
-            this.API_KEY = api_key;
-            this.googleMapsBaseUrl = googleMapsBaseUrl;
+            _googleMapsBaseUrl = ConfigurationManager.AppSettings["googleMapsBaseUrl"];
+            _googlePlacesBaseUrl = ConfigurationManager.AppSettings["googlePlacesBaseUrl"];
         }
         
-        public async Task<ResultContainer<LocationDetails>> GetGeoCoordinates(string addr)
+        public async Task<ResultContainer<LocationDetails>> GetLocationGeoCoordinates(string address)
         {
-            var searchResult = new LocationDetails();
+            var queryString = string.Format("?address={0}&key={1}", Uri.EscapeUriString(address), _apiKey);
 
-            var queryString = string.Format("?address={0}&key={1}", Uri.EscapeUriString(addr), this.API_KEY);
-
-            using (var client = new HttpClient())
-            {
-                client.BaseAddress = new Uri(googleMapsBaseUrl);
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                HttpResponseMessage response = await client.GetAsync(queryString);
-                if (!response.IsSuccessStatusCode)
-                {
-                    return new ResultContainer<LocationDetails>
-                           {
-                               Status = false,
-                               Result = null,
-                               Message = $"ERROR {response.StatusCode}:: Cannot read from Google Maps API"
-                           };
-                }
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var data = await response.Content.ReadAsAsync<GeoResults>();
-
-                    if (data.status != "OK")
-                    {
-                        return new ResultContainer<LocationDetails>
-                               {
-                                   Status = false,
-                                   Message = data.status,
-                                   Result = null
-                               };
-                    }
-
-                    searchResult.Latitude = data.results[0].geometry.location.lat;
-                    searchResult.Longitude = data.results[0].geometry.location.lng;
-                    searchResult.Address = data.results[0].formatted_address;
-                }
-            }
-
-            return new ResultContainer<LocationDetails>
-                   {
-                       Status = true,
-                       Result = searchResult
-                   };
+            return await CallGoogleMapsApi(queryString);
         }
 
         public async Task<ResultContainer<LocationDetails>> FindGeoCoordinatesLocation(double latitude, double longitude)
         {
-            var searchResult = new LocationDetails();
+            var queryString = string.Format("?latlng={0},{1}&key={2}", Uri.EscapeUriString(latitude.ToString()), Uri.EscapeUriString(longitude.ToString()), _apiKey);
 
-            var queryString = string.Format("?latlng={0},{1}&key={2}", Uri.EscapeUriString(latitude.ToString()), Uri.EscapeUriString(longitude.ToString()), this.API_KEY);
-
-            using (var client = new HttpClient())
-            {
-                client.BaseAddress = new Uri(googleMapsBaseUrl);
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                HttpResponseMessage response = await client.GetAsync(queryString);
-                if (!response.IsSuccessStatusCode)
-                {
-                    return new ResultContainer<LocationDetails>
-                    {
-                        Status = false,
-                        Result = null,
-                        Message = $"ERROR {response.StatusCode}:: Cannot read from Google Maps API"
-                    };
-                }
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var data = await response.Content.ReadAsAsync<GeoResults>();
-
-                    if (data.status != "OK")
-                    {
-                        return new ResultContainer<LocationDetails>
-                        {
-                            Status = false,
-                            Message = data.status,
-                            Result = null
-                        };
-                    }
-
-                    searchResult.Address = data.results[0].formatted_address;
-                    searchResult.Latitude = data.results[0].geometry.location.lat;
-                    searchResult.Longitude = data.results[0].geometry.location.lng;
-                }
-            }
-
-            return new ResultContainer<LocationDetails>
-            {
-                Status = true,
-                Result = searchResult
-            };
+            return await CallGoogleMapsApi(queryString);
         }
 
         public async Task<ResultContainer<LocationDetails>> FindPointsOfInterest(double latitude, double longitude, int radius)
@@ -143,13 +52,13 @@ namespace distance_calculator
                 Uri.EscapeUriString(latitude.ToString()), 
                 Uri.EscapeUriString(longitude.ToString()), 
                 Uri.EscapeUriString(radius.ToString()),
-                this.API_KEY);
+                _apiKey);
 
             var nearestPOI = new LocationDetails();
 
             using (var client = new HttpClient())
             {
-                client.BaseAddress = new Uri(googlePlacesBaseUrl);
+                client.BaseAddress = new Uri(_googlePlacesBaseUrl);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -189,6 +98,54 @@ namespace distance_calculator
             {
                 Status = true,
                 Result = nearestPOI
+            };
+        }
+
+        private async Task<ResultContainer<LocationDetails>> CallGoogleMapsApi(string queryString)
+        {
+            var searchResult = new LocationDetails();
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(_googleMapsBaseUrl);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage response = await client.GetAsync(queryString);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ResultContainer<LocationDetails>
+                    {
+                        Status = false,
+                        Result = null,
+                        Message = $"ERROR {response.StatusCode}:: Cannot read from Google Maps API"
+                    };
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var data = await response.Content.ReadAsAsync<GeoResults>();
+
+                    if (data.status != "OK")
+                    {
+                        return new ResultContainer<LocationDetails>
+                        {
+                            Status = false,
+                            Message = data.status,
+                            Result = null
+                        };
+                    }
+
+                    searchResult.Latitude = data.results[0].geometry.location.lat;
+                    searchResult.Longitude = data.results[0].geometry.location.lng;
+                    searchResult.Address = data.results[0].formatted_address;
+                }
+            }
+
+            return new ResultContainer<LocationDetails>
+            {
+                Status = true,
+                Result = searchResult
             };
         }
     }

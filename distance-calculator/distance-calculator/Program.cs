@@ -8,13 +8,14 @@ namespace distance_calculator
         static void Main(string[] args)
         {
             var locationSearch = new LocationSearch();
+            var outputService = new OutputService();
 
             // Start Location
             Console.WriteLine("Start Location");
             var startSearchResult = locationSearch.SearchLocation();
             if (!startSearchResult.Status)
             {
-                ExitWithError(startSearchResult.Message);
+                outputService.ExitWithError(startSearchResult.Message);
             }
 
             var startLocation = startSearchResult.Result;
@@ -24,7 +25,7 @@ namespace distance_calculator
             var endSearchResult = locationSearch.SearchLocation();
             if (!endSearchResult.Status)
             {
-                ExitWithError(endSearchResult.Message);
+                outputService.ExitWithError(endSearchResult.Message);
             }
 
             var endLocation = endSearchResult.Result;
@@ -37,15 +38,17 @@ namespace distance_calculator
 
             var distanceInMetres = geoCalculations.CalculateDistanceInMetres(startCoord, endCoord);
 
-            
-            OutputResults(startLocation, endLocation, distanceInMetres);
+
+            outputService.ClearScreen();
+            outputService.DisplayLocation("Start Location", startLocation);
+            outputService.DisplayLocation("End Location", endLocation);
+            outputService.DisplayDistance(distanceInMetres);
 
 
             // Midpoint
             var midPoint = geoCalculations.MidPoint(startCoord, endCoord);
             var midPointLocation = locationSearch.FindLocationFromGeoCoordinates(midPoint.Latitude, midPoint.Longitude);
 
-            var outputService = new OutputService();
             outputService.DisplayLocation("Midpoint", midPointLocation.Result);
 
 
@@ -53,34 +56,13 @@ namespace distance_calculator
             var poi = locationSearch.FindPointsOfInterest(midPoint.Latitude, midPoint.Longitude);
             if (!poi.Status)
             {
-                ExitWithError(poi.Message);
+                outputService.ExitWithError(poi.Message);
             }
 
             outputService.DisplayPOI(poi.Result);
 
             Console.WriteLine(Environment.NewLine + "Press any key to exit...");
             Console.ReadKey();
-        }
-
-        static void OutputResults(LocationDetails startLocation, LocationDetails endLocation, double distanceInMetres)
-        {
-            Console.Clear();
-
-            var outputService = new OutputService();
-
-            outputService.DisplayLocation("Start Location", startLocation);
-            outputService.DisplayLocation("End Location", endLocation);
-
-            Console.WriteLine();
-            Console.WriteLine($"Distance: {distanceInMetres / 1000:0.00} km");
-        }
-
-        static void ExitWithError(string errorMessage)
-        {
-            Console.WriteLine("ERROR:: {0}", errorMessage);
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
-            Environment.Exit(0);
         }
     }
 }
